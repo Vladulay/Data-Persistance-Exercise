@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -7,6 +8,7 @@ using UnityEngine.UI;
 public class MainManager : MonoBehaviour
 {
     public static MainManager Instance;
+    public string playerName;
 
     public Brick BrickPrefab;
     public int LineCount = 6;
@@ -34,12 +36,23 @@ public class MainManager : MonoBehaviour
         LoadHighscore();
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void SetupMainScene()
     {
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
+
+        ScoreText = GameObject.Find("ScoreText").GetComponent<Text>();
+        GameOverText = GameObject.Find("GameoverText");
+        GameOverText.SetActive(false);
+
+        GameObject BallObject;
+        BallObject = GameObject.Find("Ball");
+        if (BallObject != null)
+        {
+            Ball = BallObject.GetComponent<Rigidbody>();
+            Debug.Log("Ball Rb Found");
+        }
+
         int[] pointCountArray = new [] {1,1,2,2,5,5};
         for (int i = 0; i < LineCount; ++i)
         {
@@ -51,10 +64,12 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
     }
 
     private void Update()
     {
+
         if (!m_Started)
         {
             if (Input.GetKeyDown(KeyCode.Space))
@@ -64,8 +79,11 @@ public class MainManager : MonoBehaviour
                 Vector3 forceDir = new Vector3(randomDirection, 1, 0);
                 forceDir.Normalize();
 
-                Ball.transform.SetParent(null);
-                Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
+                if (Ball != null)
+                {
+                    Ball.transform.SetParent(null);
+                    Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
+                }
             }
         }
         else if (m_GameOver)
@@ -92,5 +110,14 @@ public class MainManager : MonoBehaviour
     public void LoadHighscore()
     {
         Debug.Log("Add code to load highscore");
+    }
+
+    public void SetName()
+    {
+        string typedName = "Test";
+        typedName = GameObject.Find("Typed Name").GetComponent<TextMeshProUGUI>().text;
+        Debug.Log(typedName);
+
+        playerName = typedName;
     }
 }
