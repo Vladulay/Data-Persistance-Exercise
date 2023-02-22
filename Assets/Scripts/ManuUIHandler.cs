@@ -12,4 +12,8 @@ public class ManuUIHandler : MonoBehaviour
         SceneManager.LoadScene(1);
     }
 
+    public void DeleteProgress()
+    {
+        MainManager.Instance.DeleteData();
+    }
 }
