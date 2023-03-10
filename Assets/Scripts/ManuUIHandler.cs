@@ -12,6 +12,16 @@ public class ManuUIHandler : MonoBehaviour
         SceneManager.LoadScene(1);
     }
 
+    public void EnterHallOfFame()
+    {
+        SceneManager.LoadScene(2);
+    }
+
+    public void EnterMenu()
+    {
+        SceneManager.LoadScene(0);
+    }
+
     public void DeleteProgress()
     {
         MainManager.Instance.DeleteData();
