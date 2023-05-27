@@ -19,17 +19,23 @@ public class MainManager : MonoBehaviour
     public Text ScoreText;
     public GameObject GameOverText;
     public Text HighscoreText;
+    public GameObject MenuButton;
     
     private bool m_Started = false;
     private int m_Points;
     
     private bool m_GameOver = false;
 
-    public int highscore;
-    public string bestPlayerName;
+    public int[] highscore;
+    public string[] bestPlayerName;
+
+    public Color favColor;
 
     private void Awake()
     {
+        bestPlayerName = new string[3];
+        highscore= new int[3];
+
         if (Instance != null)
         {
             Destroy(gameObject);
@@ -61,6 +67,8 @@ public class MainManager : MonoBehaviour
                     Ball.transform.SetParent(null);
                     Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
                 }
+
+                MenuButton.SetActive(false);
             }
         }
         else if (m_GameOver)
@@ -75,8 +83,13 @@ public class MainManager : MonoBehaviour
     [System.Serializable]
     class SaveData
     {
-        public string playerName;
-        public int highscore;
+        public string firstPlayerName;
+        public string secondPlayerName;
+        public string thirdPlayerName;
+        public int firstHighscore;
+        public int secondHighscore;
+        public int thirdHighscore;
+        public string favColor;
     }
 
     public void SetupMainScene()
@@ -91,13 +104,13 @@ public class MainManager : MonoBehaviour
         GameOverText = GameObject.Find("GameoverText");
         GameOverText.SetActive(false);
         HighscoreText = GameObject.Find("HighscoreText").GetComponent<Text>();
+        MenuButton = GameObject.Find("Menu Button");
 
         GameObject BallObject;
         BallObject = GameObject.Find("Ball");
         if (BallObject != null)
         {
             Ball = BallObject.GetComponent<Rigidbody>();
-            Debug.Log("Ball Rb Found");
         }
 
         int[] pointCountArray = new [] {1,1,2,2,5,5};
@@ -127,8 +140,9 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        MenuButton.SetActive(true);
 
-        if (m_Points > highscore)
+        if (m_Points > highscore[2])
         {
             SaveScore();
         }
@@ -137,11 +151,42 @@ public class MainManager : MonoBehaviour
     public void SaveScore()
     {
         SaveData data = new SaveData();
-        data.playerName = playerName;
-        data.highscore = m_Points;
-        highscore = m_Points;
-        bestPlayerName = playerName;
 
+        if (m_Points > highscore[0])
+        {
+            highscore[2] = highscore[1];
+            highscore[1] = highscore[0];
+            highscore[0] = m_Points;
+
+            bestPlayerName[2] = bestPlayerName[1];
+            bestPlayerName[1] = bestPlayerName[0];
+            bestPlayerName[0] = playerName;
+        }
+        else if (m_Points > highscore[1])
+        {
+            highscore[2] = highscore[1];
+            highscore[1] = m_Points;
+
+            bestPlayerName[2] = bestPlayerName[1];
+            bestPlayerName[1] = playerName;
+        }
+        else if (m_Points > highscore[2])
+        {
+            highscore[2] = m_Points;
+
+            bestPlayerName[2] = playerName;
+        }
+                
+        data.firstPlayerName = bestPlayerName[0];
+        data.secondPlayerName = bestPlayerName[1];
+        data.thirdPlayerName = bestPlayerName[2];
+
+        data.firstHighscore = highscore[0];
+        data.secondHighscore = highscore[1];
+        data.thirdHighscore = highscore[2];
+
+        data.favColor = ColorUtility.ToHtmlStringRGBA(favColor);
+        
         string json = JsonUtility.ToJson(data);
 
         File.WriteAllText(path, json);
@@ -156,21 +201,57 @@ public class MainManager : MonoBehaviour
             string json = File.ReadAllText(path);
             SaveData data = JsonUtility.FromJson<SaveData>(json);
 
-            highscore = data.highscore;
-            bestPlayerName = data.playerName;
+            highscore[0] = data.firstHighscore;
+            highscore[1] = data.secondHighscore;
+            highscore[2] = data.thirdHighscore;
+
+            bestPlayerName[0] = data.firstPlayerName;
+            bestPlayerName[1] = data.secondPlayerName;
+            bestPlayerName[2] = data.thirdPlayerName;
+
+            Color newCol;
+
+            if (ColorUtility.TryParseHtmlString("#"+data.favColor, out newCol))
+            {
+                favColor = newCol;
+            }
+
+            
         }
         else
         {
-            bestPlayerName = "Nobody";
-            highscore = 0;
+            bestPlayerName[0] = "Nobody";
+            bestPlayerName[1] = "Nobody";
+            bestPlayerName[2] = "Nobody";
+            highscore[0] = 0;
+            highscore[1] = 0;
+            highscore[2] = 0;
+
+            m_Points = 0;
+            playerName = "Nobody";
+
+            Color newCol;
+            if (ColorUtility.TryParseHtmlString("#00FFFF", out newCol))
+            {
+                favColor = newCol;
+            }
+
             SaveScore();
         }
+
+        
     }
 
     public void DeleteData()
     {
-        playerName = "Nobody";
+        bestPlayerName[0] = "Nobody";
+        bestPlayerName[1] = "Nobody";
+        bestPlayerName[2] = "Nobody";
+        highscore[0] = 0;
+        highscore[1] = 0;
+        highscore[2] = 0;
         m_Points = 0;
+
         SaveScore();
     }
 
@@ -187,14 +268,13 @@ public class MainManager : MonoBehaviour
         {
             playerName = "Nobody";
         }
-        
     }
 
     public void UpdateHighscore()
     {
         if(HighscoreText != null)
         {
-            HighscoreText.text = bestPlayerName + " holds the Highscore with " + highscore + " points";
+            HighscoreText.text = bestPlayerName[0] + " holds the Highscore with " + highscore[0] + " points";
         }
     }
 }
