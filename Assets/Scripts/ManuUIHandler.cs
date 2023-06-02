@@ -9,7 +9,7 @@ public class ManuUIHandler : MonoBehaviour
 {
     public Texture2D sourceTex;
     public Color[] pix;
-    private int width;
+    public int width;
     public int colorIndex;
 
 
@@ -79,6 +79,7 @@ public class ManuUIHandler : MonoBehaviour
         
 
         MainManager.Instance.favColor = pickedColor;
+        MainManager.Instance.favColorIndex = colorIndex;
         MainManager.Instance.SaveScore();
     }
 }

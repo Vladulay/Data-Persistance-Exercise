@@ -30,9 +30,12 @@ public class MainManager : MonoBehaviour
     public string[] bestPlayerName;
 
     public Color favColor;
+    public int favColorIndex;
 
     private void Awake()
     {
+        playerName = "Enter Name";
+        
         bestPlayerName = new string[3];
         highscore= new int[3];
 
@@ -90,6 +93,7 @@ public class MainManager : MonoBehaviour
         public int secondHighscore;
         public int thirdHighscore;
         public string favColor;
+        public int favColorIndex;
     }
 
     public void SetupMainScene()
@@ -186,6 +190,7 @@ public class MainManager : MonoBehaviour
         data.thirdHighscore = highscore[2];
 
         data.favColor = ColorUtility.ToHtmlStringRGBA(favColor);
+        data.favColorIndex = favColorIndex;
         
         string json = JsonUtility.ToJson(data);
 
@@ -216,7 +221,7 @@ public class MainManager : MonoBehaviour
                 favColor = newCol;
             }
 
-            
+            favColorIndex = data.favColorIndex;
         }
         else
         {
@@ -235,6 +240,8 @@ public class MainManager : MonoBehaviour
             {
                 favColor = newCol;
             }
+
+            favColorIndex = 1;
 
             SaveScore();
         }
